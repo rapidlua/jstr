@@ -5,15 +5,23 @@
 static inline void token_init_ptr(
     jstr_token_t *token, jstr_type_t type, void *ptr
 ) {
+#if JSTR_TOKEN_COMPRESSED
+    token->opaque = (uintptr_t)ptr<<8 | type;
+#else
     token->type = type;
     token->value = ptr;
+#endif
 }
 
 static inline void token_init_offset(
     jstr_token_t *token, jstr_type_t type, size_t offset
 ) {
+#if JSTR_TOKEN_COMPRESSED
+    token->opaque = (uintptr_t)offset<<8 | type;
+#else
     token->type = type;
     token->offset = offset;
+#endif
 }
 
 // > 0: success, end pos
@@ -37,6 +45,9 @@ ssize_t jstr_parse(
     } else {
         cs = jstr_type(token_parent) == JSTR_OBJECT ? OBJECT_VALUE : ARRAY_ITEM;
     }
+#if JSTR_TOKEN_COMPRESSED
+    if (((uintptr_t)-1>>8) <= token_count) return JSTR_2BIG;
+#endif
 parse_generic:
     if (token_end - token_cur < 2) {
         parser->parse_pos = (char *)p-str;
@@ -198,6 +209,9 @@ commit_token: {
         while (WS(c)) c=*p++;
         switch (cs) {
         case TOP:
+#if JSTR_TOKEN_COMPRESSED
+            if ((uintptr_t)p > ((uintptr_t)-1>>8)) return JSTR_2BIG;
+#endif
             return (char *)p-str-1;
         case OBJECT_KEY:
             if (c != ':') return JSTR_INVAL;
@@ -221,6 +235,9 @@ pop_context: {
         token_init_offset(token_parent, t, token_cur-token_parent);
         token_parent = token_grandparent;
         if (token_parent < token) {
+#if JSTR_TOKEN_COMPRESSED
+            if ((uintptr_t)p > ((uintptr_t)-1>>8)) return JSTR_2BIG;
+#endif
             return (char *)p-str;
         } else {
             cs = jstr_type(token_parent) == JSTR_OBJECT ? OBJECT_VALUE : ARRAY_ITEM;
