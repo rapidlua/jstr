@@ -1,6 +1,8 @@
 # jstr
 Minimalistic fully-validating Unicode-aware JSON parser
 
+![jester image](http://www.briarpress.org/?q=system/files/images/jester2.png)
+
 Pronounced *Jester*, a pun at [JSMN/Jasmin](https://github.com/zserge/jsmn),
 the parser generates a read-only JSON DOM in a caller-provided buffer.
 
@@ -13,7 +15,7 @@ Incremental parsing is NOT supported. This decision allows to simplify the libra
 significantly. Who needs incremental parsing, seriously?
 
 Unlike [JSMN/Jasmin](https://github.com/zserge/jsmn), the world's sloppiest JSON parser
-(which touts itself as the world's fastest), Jester works according to the JSON spec.
+(which touts itself as the world's fastest), Jester is not a joke!
 Object keys are checked to be strings, every key must have a corresponding value,
 random unquoted literals are not allowed and even inputs that aren't valid UTF-8 are rejected.
 
