@@ -35,20 +35,19 @@ ssize_t jstr_parse(
     };
 #define WS(v) (ws[(v)&7]==(v))
     unsigned char *p = (unsigned char *)str + parser->parse_pos;
-    jstr_token_t *token_cur = token + parser->token_count;
+    jstr_token_t *token_cur = token + parser->cur_offset;
     jstr_token_t *token_end = token + token_count;
     jstr_token_t *token_parent = token + parser->parent_offset;
     enum {
         TOP, OBJECT_VALUE = JSTR_OBJECT, ARRAY_ITEM = JSTR_ARRAY, OBJECT_KEY
-    } cs;
-    cs = token_parent == token_cur ? TOP : jstr_type(token_parent);
+    } cs = token_parent == token_cur ? TOP : jstr_type(token_parent);
 #if JSTR_TOKEN_COMPRESSED
     if (((uintptr_t)-1>>8) <= token_count) return JSTR_2BIG;
 #endif
 parse_generic:
     if (token_end - token_cur < 2) {
         parser->parse_pos = (char *)p-str;
-        parser->token_count = token_cur - token;
+        parser->cur_offset = token_cur - token;
         parser->parent_offset = token_parent - token;
         return JSTR_NOMEM;
     }

@@ -62,13 +62,13 @@ static inline const jstr_token_t *jstr_next(const jstr_token_t *token) {
 
 typedef struct {
     size_t parse_pos;
-    size_t token_count;
+    size_t cur_offset;
     size_t parent_offset;
 } jstr_parser_t;
 
 static inline void jstr_init(jstr_parser_t *parser) {
     parser->parse_pos = 0;
-    parser->token_count = 0;
+    parser->cur_offset = 0;
     parser->parent_offset = 0;
 }
 
