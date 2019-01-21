@@ -69,7 +69,7 @@ typedef struct {
 static inline void jstr_init(jstr_parser_t *parser) {
     parser->parse_pos = 0;
     parser->token_count = 0;
-    parser->parent_offset = -sizeof(jstr_token_t);
+    parser->parent_offset = 0;
 }
 
 enum {

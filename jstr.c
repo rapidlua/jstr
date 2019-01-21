@@ -37,12 +37,11 @@ ssize_t jstr_parse(
     unsigned char *p = (unsigned char *)str + parser->parse_pos;
     jstr_token_t *token_cur = token + parser->token_count;
     jstr_token_t *token_end = token + token_count;
-    jstr_token_t *token_parent = (void *)((uintptr_t)token + parser->parent_offset);
+    jstr_token_t *token_parent = token + parser->parent_offset;
     enum {
         TOP, OBJECT_VALUE = JSTR_OBJECT, ARRAY_ITEM = JSTR_ARRAY, OBJECT_KEY
     } cs;
-    if (!token) return JSTR_NOMEM;
-    cs = token_parent < token ? TOP : jstr_type(token_parent);
+    cs = token_parent == token_cur ? TOP : jstr_type(token_parent);
 #if JSTR_TOKEN_COMPRESSED
     if (((uintptr_t)-1>>8) <= token_count) return JSTR_2BIG;
 #endif
@@ -50,7 +49,7 @@ parse_generic:
     if (token_end - token_cur < 2) {
         parser->parse_pos = (char *)p-str;
         parser->token_count = token_cur - token;
-        parser->parent_offset = (uintptr_t)token_parent - (uintptr_t)token;
+        parser->parent_offset = token_parent - token;
         return JSTR_NOMEM;
     }
     while (WS(*p)) ++p;
@@ -232,8 +231,9 @@ pop_context: {
             - jstr__offset(token_parent);
         token_init_offset(
             token_parent, jstr_type(token_parent), token_cur-token_parent);
+        cs = token_parent == token_grandparent
+            ? TOP : jstr_type(token_grandparent);
         token_parent = token_grandparent;
-        cs = token_parent < token ? TOP : jstr_type(token_parent);
         goto commit_token;
     }
 }
