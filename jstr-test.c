@@ -49,7 +49,7 @@ static void test(int lineno, const char *json, ssize_t rc_expected, ... ) {
                     jstr_type_to_str(jstr_type(token+i)),
                     type_expected, jstr_type(token+i)
                 );
-                +err;
+                ++err;
             }
             if (type_expected&(JSTR_ARRAY|JSTR_OBJECT)) {
                 size_t offset_expected = va_arg(ap, size_t);
