@@ -209,6 +209,7 @@ commit_token: {
         while (WS(c)) c=*p++;
         switch (cs) {
         case TOP:
+            if (c) return JSTR_INVAL;
 #if JSTR_TOKEN_COMPRESSED
             if ((uintptr_t)p > ((uintptr_t)-1>>8)) return JSTR_2BIG;
 #endif
@@ -235,13 +236,10 @@ pop_context: {
         token_init_offset(token_parent, t, token_cur-token_parent);
         token_parent = token_grandparent;
         if (token_parent < token) {
-#if JSTR_TOKEN_COMPRESSED
-            if ((uintptr_t)p > ((uintptr_t)-1>>8)) return JSTR_2BIG;
-#endif
-            return (char *)p-str;
+            cs = TOP;
         } else {
             cs = jstr_type(token_parent) == JSTR_OBJECT ? OBJECT_VALUE : ARRAY_ITEM;
-            goto commit_token;
         }
+        goto commit_token;
     }
 }

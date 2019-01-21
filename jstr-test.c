@@ -87,10 +87,12 @@ int main() {
     test("\"", JSTR_INVAL);
     test("\"foo", JSTR_INVAL);
     test("\"\"", 2, JSTR_STRING, "", 0);
-    test("\"\"junk", 2, JSTR_STRING, "", 0);
+    test("\"\"junk", JSTR_INVAL);
     test("\"foo\"", 5, JSTR_STRING, "foo", 0);
+    test("  \"foo\"", 7, JSTR_STRING, "foo", 0);
+    test("\"foo\"  ", 7, JSTR_STRING, "foo", 0);
     test(" \t\n\"foo\"", 8, JSTR_STRING, "foo", 0);
-    test("\"foo\"junk", 5, JSTR_STRING, "foo", 0);
+    test("\"foo\"junk", JSTR_INVAL);
     test("\"\\", JSTR_INVAL);
     test("\"--\\\"--\"", 8, JSTR_STRING, "--\"--", 0);
     test("\"--\\\\--\"", 8, JSTR_STRING, "--\\--", 0);
@@ -154,7 +156,9 @@ int main() {
     // number
     test("0", 1, JSTR_NUMBER, "0", 0);
     test("42", 2, JSTR_NUMBER, "42", 0);
-    test("42junk", 2, JSTR_NUMBER, "42", 0);
+    test("42junk", JSTR_INVAL);
+    test("42 true ", JSTR_INVAL);
+    test("1,2", JSTR_INVAL);
     test("999", 3, JSTR_NUMBER, "999", 0);
     test("-0", 2, JSTR_NUMBER, "-0", 0);
     test("+0", JSTR_INVAL);
@@ -173,7 +177,9 @@ int main() {
     test("}", JSTR_INVAL);
     test("{]", JSTR_INVAL);
     test("{}", 2, JSTR_OBJECT, (size_t)1, 0);
-    test("{}junk", 2, JSTR_OBJECT, (size_t)1, 0);
+    test("{},", JSTR_INVAL);
+    test("{}}", JSTR_INVAL);
+    test("{}junk", JSTR_INVAL);
     test("{1}", JSTR_INVAL);
     test("{{}:1}", JSTR_INVAL);
     test("{[]:1}", JSTR_INVAL);
@@ -227,10 +233,10 @@ int main() {
     test("{\"A\":{\"B\":{,\"C\":{}}}}", JSTR_INVAL);
     test("{\"A\":{\"B\":{\"C\":{}}},\"D\"}", JSTR_INVAL),
     test("{\"A\":{\"B\":{\"C\":{}}}\"D\":42}", JSTR_INVAL),
-    test("  {              }  ", 18,
+    test("  {              }  ", 20,
         JSTR_OBJECT, (size_t)1, 0
     );
-    test("  {    \"foo\" : 11 , \"\" : 0   }  ", 30,
+    test("  {    \"foo\" : 11 , \"\" : 0   }  ", 32,
         JSTR_OBJECT, (size_t)5,
         JSTR_STRING, "foo",
         JSTR_NUMBER, "11",
@@ -243,7 +249,7 @@ int main() {
     test("]", JSTR_INVAL);
     test("[}", JSTR_INVAL);
     test("[]", 2, JSTR_ARRAY, (size_t)1, 0);
-    test("[]junk", 2, JSTR_ARRAY, (size_t)1, 0);
+    test("[]junk", JSTR_INVAL);
     test("[,1,2,3,4,5,6,7]", JSTR_INVAL);
     test("[0,1,2,3,,5,6,7]", JSTR_INVAL);
     test("[0,1,2,3,4,5,6,]", JSTR_INVAL);
@@ -278,10 +284,10 @@ int main() {
         JSTR_ARRAY, (size_t)1,
         JSTR_NUMBER, "1", 0
     );
-    test(" [           ] ", 14,
+    test(" [           ] ", 15,
         JSTR_ARRAY, (size_t)1, 0
     );
-    test(" [ 0 , 1 , 2 ] ", 14,
+    test(" [ 0 , 1 , 2 ] ", 15,
         JSTR_ARRAY, (size_t)4,
         JSTR_NUMBER, "0",
         JSTR_NUMBER, "1",
