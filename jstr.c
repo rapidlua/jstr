@@ -38,13 +38,11 @@ ssize_t jstr_parse(
     jstr_token_t *token_cur = token + parser->token_count;
     jstr_token_t *token_end = token + token_count;
     jstr_token_t *token_parent = (void *)((uintptr_t)token + parser->parent_offset);
-    enum { TOP, OBJECT_KEY, OBJECT_VALUE, ARRAY_ITEM } cs;
+    enum {
+        TOP, OBJECT_VALUE = JSTR_OBJECT, ARRAY_ITEM = JSTR_ARRAY, OBJECT_KEY
+    } cs;
     if (!token) return JSTR_NOMEM;
-    if (token_parent < token) {
-        cs = TOP;
-    } else {
-        cs = jstr_type(token_parent) == JSTR_OBJECT ? OBJECT_VALUE : ARRAY_ITEM;
-    }
+    cs = token_parent < token ? TOP : jstr_type(token_parent);
 #if JSTR_TOKEN_COMPRESSED
     if (((uintptr_t)-1>>8) <= token_count) return JSTR_2BIG;
 #endif
@@ -230,16 +228,12 @@ commit_token: {
     }
 
 pop_context: {
-        jstr_token_t *token_grandparent;
-        int t = jstr_type(token_parent);
-        token_grandparent = token_parent - jstr__offset(token_parent);
-        token_init_offset(token_parent, t, token_cur-token_parent);
+        jstr_token_t *token_grandparent = token_parent
+            - jstr__offset(token_parent);
+        token_init_offset(
+            token_parent, jstr_type(token_parent), token_cur-token_parent);
         token_parent = token_grandparent;
-        if (token_parent < token) {
-            cs = TOP;
-        } else {
-            cs = jstr_type(token_parent) == JSTR_OBJECT ? OBJECT_VALUE : ARRAY_ITEM;
-        }
+        cs = token_parent < token ? TOP : jstr_type(token_parent);
         goto commit_token;
     }
 }

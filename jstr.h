@@ -4,10 +4,10 @@
 #include <stdlib.h>
 
 typedef enum {
-    JSTR_STRING = 0x01,
-    JSTR_NUMBER = 0x02,
-    JSTR_OBJECT = 0x04,
-    JSTR_ARRAY  = 0x08,
+    JSTR_OBJECT = 0x01,
+    JSTR_ARRAY  = 0x02,
+    JSTR_STRING = 0x04,
+    JSTR_NUMBER = 0x08,
     JSTR_TRUE   = 0x10,
     JSTR_FALSE  = 0x20,
     JSTR_NULL   = 0x40
