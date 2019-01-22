@@ -2,25 +2,14 @@
 
 #include <stdint.h>
 
-static inline void token_init_ptr(
-    jstr_token_t *token, jstr_type_t type, void *ptr
+static inline void token_init(
+    jstr_token_t *token, jstr_type_t type, uintptr_t value
 ) {
 #if JSTR_TOKEN_COMPRESSED
-    token->opaque = (uintptr_t)ptr<<8 | type;
+    token->type_and_value__ = value<<8 | type;
 #else
-    token->type = type;
-    token->value = ptr;
-#endif
-}
-
-static inline void token_init_offset(
-    jstr_token_t *token, jstr_type_t type, size_t offset
-) {
-#if JSTR_TOKEN_COMPRESSED
-    token->opaque = (uintptr_t)offset<<8 | type;
-#else
-    token->type = type;
-    token->offset = offset;
+    token->type__ = type;
+    token->value__ = value;
 #endif
 }
 
@@ -56,20 +45,20 @@ parse_generic:
     default:
         return JSTR_INVAL;
     case '[':
-        token_init_offset(token_cur, JSTR_ARRAY, token_cur - token_parent);
+        token_init(token_cur, JSTR_ARRAY, token_cur - token_parent);
         token_parent = token_cur++; cs = ARRAY_ITEM;
         do { ++p; } while (WS(*p));
         if (*p==']') { ++p; goto pop_context; }
         goto parse_generic;
     case '{':
-        token_init_offset(token_cur, JSTR_OBJECT, token_cur - token_parent);
+        token_init(token_cur, JSTR_OBJECT, token_cur - token_parent);
         token_parent = token_cur++; cs = OBJECT_KEY;
         do { ++p; } while (WS(*p));
         if (*p=='}') { ++p; goto pop_context; }
         goto parse_object_key;
     case '-':
     case '0'...'9':
-        token_init_ptr(token_cur++, JSTR_NUMBER, p);
+        token_init(token_cur++, JSTR_NUMBER, (uintptr_t)p);
         if (*p=='-') ++p;
         if (*p=='0' && (unsigned)p[1]-'0'<=9) return JSTR_INVAL;
         while ((unsigned)*p-'0'<=9) ++p;
@@ -88,19 +77,19 @@ parse_generic:
     case '"':
         goto parse_string;
     case 't':
-        token_init_ptr(token_cur++, JSTR_TRUE, p);
+        token_init(token_cur++, JSTR_TRUE, (uintptr_t)p);
         goto parse_true_false_or_null;
     case 'f':
-        token_init_ptr(token_cur++, JSTR_FALSE, p);
+        token_init(token_cur++, JSTR_FALSE, (uintptr_t)p);
         goto parse_true_false_or_null;
     case 'n':
-        token_init_ptr(token_cur++, JSTR_NULL, p);
+        token_init(token_cur++, JSTR_NULL, (uintptr_t)p);
         goto parse_true_false_or_null;
     }
 
 parse_string: {
         unsigned char *out = ++p;
-        token_init_ptr(token_cur++, JSTR_STRING, out);
+        token_init(token_cur++, JSTR_STRING, (uintptr_t)out);
         while (1) {
 parse_char:
             if ((unsigned)*p-0x20 <= 0x7f-0x20) { // ascii
@@ -228,7 +217,7 @@ commit_token: {
 pop_context: {
         jstr_token_t *token_grandparent = token_parent
             - jstr__offset(token_parent);
-        token_init_offset(
+        token_init(
             token_parent, jstr_type(token_parent), token_cur-token_parent);
         cs = token_parent == token_grandparent
             ? TOP : jstr_type(token_grandparent);

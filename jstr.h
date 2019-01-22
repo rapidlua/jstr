@@ -21,37 +21,34 @@ typedef enum {
 
 typedef struct {
 #if JSTR_TOKEN_COMPRESSED
-    uintptr_t opaque;
+    uintptr_t type_and_value__;
 #else
-    jstr_type_t type;
-    union {
-        const char *value;
-        size_t offset;
-    };
+    jstr_type_t type__;
+    uintptr_t value__;
 #endif
 } jstr_token_t;
 
 static inline jstr_type_t jstr_type(const jstr_token_t *token) {
 #if JSTR_TOKEN_COMPRESSED
-    return 0xff & token->opaque;
+    return 0xff & token->type_and_value__;
 #else
-    return token->type;
+    return token->type__;
 #endif
 }
 
 static inline const char *jstr_value(const jstr_token_t *token) {
 #if JSTR_TOKEN_COMPRESSED
-    return (const char *)(token->opaque >> 8);
+    return (const char *)(token->type_and_value__ >> 8);
 #else
-    return token->value;
+    return (const char *)token->value__;
 #endif
 }
 
 static inline size_t jstr__offset(const jstr_token_t *token) {
 #if JSTR_TOKEN_COMPRESSED
-    return token->opaque >> 8;
+    return token->type_and_value__ >> 8;
 #else
-    return token->offset;
+    return token->value__;
 #endif
 }
 
