@@ -1,14 +1,14 @@
 # jstr
-Minimalistic fully-validating Unicode-aware JSON parser
+Minimalistic fully-validating Unicode-aware JSON parser in C
 
-![jester image](http://www.briarpress.org/?q=system/files/images/jester2.png)
+![jester image](/doc/jester.png)
 
 Pronounced *Jester*, a pun at [JSMN/Jasmin](https://github.com/zserge/jsmn),
 the parser generates a read-only JSON DOM in a caller-provided buffer.
 
 Parsing is destructive, i.e. the parser alters JSON string as it goes. This is
 primarily used to terminate tokens with `\0` characters. DOM node stores the value
-(a C-string) as a pointer into the JSON string. String escapes, ex: `\n`, `\uXXXX`,
+(a C string) as a pointer into the JSON string. String escapes, ex: `\n`, `\uXXXX`,
 are decoded in-place.
 
 Incremental parsing is NOT supported. This decision allows to simplify the library's code
@@ -16,11 +16,56 @@ significantly. Who needs incremental parsing, seriously?
 
 Unlike [JSMN/Jasmin](https://github.com/zserge/jsmn), the world's sloppiest JSON parser
 (which touts itself as the world's fastest), Jester is not a joke!
-Object keys are checked to be strings, every key must have a corresponding value,
-random unquoted literals are not allowed and even inputs that aren't valid UTF-8 are rejected.
+Non-string keys in objects are prohibited, every key must have a corresponding value,
+random unquoted literals are not allowed and inputs that aren't valid UTF-8 are rejected.
 
-(How sloppy JSMN really is? Take a look at commented-out lines in their testsuite
-labeled [FIXME](https://github.com/zserge/jsmn/blob/master/test/tests.c#L58).)
+(Wonder how sloppy JSMN really is? Take a look at the numerous
+[disabled tests](https://github.com/zserge/jsmn/blob/master/test/tests.c#L58)
+in their testsuite!)
+
+## Read-only DOM in a caller-provided buffer, you say?
+
+Consider a JSON snippet:
+
+```json
+{"name":"root","id":0}
+```
+
+The figure below depicts it as a C string (a cell is a byte). 
+
+![string layout](/doc/memlayout0.svg)
+
+The parser alters a JSON string as it goes. String escape
+sequences are decoded in-place and `\0` characters are
+written to terminate tokens.
+
+The next figure shows JSON string before and after
+parser invocation. Cells bearing a question mark have
+undefined value.
+
+![memory layout](/doc/memlayout.svg)
+
+Caller provides the parser with an array of `jstr_token_t`
+objects. This array ends up storing `OBJECT`, `STRING`, `STRING`,
+`STRING`, `NUMBER` tokens. Primitive tokens store a C string value —
+a pointer to characters — depicted with arrows in the drawing.
+
+`OBJECT` and `ARRAY` tokens store the number of child tokens, making it
+possible to skip subtrees efficiently. Note that skipping a subtree
+yields the **next sibling**. The **first child** is the next token after
+the parent. These two operations are sufficient to traverse a tree, hence
+we are entitled to call our token array a JSON DOM.
+
+This data structure is convenient for tree traversal, but
+modifications — insering a node, for instance — are NOT supported.
+Due to this limitation we call it a **read-only** DOM.
+
+(Technically, since tokens don't require cleanup,
+a caller may mutate the buffer freely.
+Convert a JSON array of strings in a JSON DOM into
+a NULL-terminated array of pointers to characters in-place?
+Why not!)
+
 
 ## Usage
 
