@@ -1,7 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include <sys/types.h>
 
 typedef enum {
     JSTR_OBJECT = 0x01,

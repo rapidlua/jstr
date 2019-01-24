@@ -1,7 +1,5 @@
 #include "jstr.h"
 
-#include <stdint.h>
-
 static inline void token_init(
     jstr_token_t *token, jstr_type_t type, uintptr_t value
 ) {

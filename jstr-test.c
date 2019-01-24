@@ -1,6 +1,7 @@
 #include "jstr.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static const char *jstr_type_to_str(jstr_type_t t) {
