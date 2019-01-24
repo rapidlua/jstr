@@ -73,13 +73,34 @@ Why not!)
 void jstr_init(jstr_parser_t *parser);
 ```
 
+Init parser (opaque `jstr_parser_t` structure). No cleanup is necessary.
+
 ```c
 ssize_t jstr_parse(
   jstr_parser_t *parser, char *json, jstr_token_t *token, size_t token_count
 );
 ```
 
+Parse JSON data. Returns the number of bytes consumed on success. A negative
+return value indicates a failure. Possible failures:
+
+`JSTR_INVAL (-1)` Parse error.
+
+`JSTR_NOMEM (-2)` Token array is too small. Grow the array. Resume
+the parser by calling `jstr_parse` again.
+
+`JSTR_2BIG  (-3)` String is too large or too many tokens produced.
+
+### Tokens
+
+Token is an opaque `jstr_token_t` structure. No cleanup is necessary.
+Token size matches the size of a pointer or exceeds it.
+
+Use `jstr_type` function to get token's type:
+
 ```c
+jstr_type_t jstr_type(const jstr_token_t *token);
+
 typedef enum {
   JSTR_OBJECT = 0x01,
   JSTR_ARRAY  = 0x02,
@@ -91,13 +112,15 @@ typedef enum {
 } jstr_type_t;
 ```
 
-```c
-jstr_type_t jstr_type(const jstr_token_t *token);
-```
+Use `jstr_value` function to get token's value (a C string).
+Don't use with `OBJECT` or `ARRAY`.
 
 ```c
 const char *jstr_value(const jstr_token_t *token);
 ```
+
+Use `jstr_next` to skip all chidren of the token.
+Works with all token types.
 
 ```c
 const jstr_token_t *jstr_next(const jstr_token_t *token);
