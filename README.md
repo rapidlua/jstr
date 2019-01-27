@@ -1,7 +1,7 @@
 # jstr
 Minimalistic fully-validating Unicode-aware JSON parser in C
 
-![jester image](/doc/jester.png)
+![jester image](./doc/jester.png)
 
 Pronounced *Jester*, a pun at [JSMN/Jasmin](https://github.com/zserge/jsmn),
 the parser generates a read-only JSON DOM in a caller-provided buffer.
@@ -33,7 +33,7 @@ Consider a JSON snippet:
 
 The figure below depicts it as a C string (a cell is a byte). 
 
-![string layout](/doc/memlayout0.svg)
+![string layout](./doc/memlayout0.svg)
 
 The parser alters a JSON string as it goes. String escape
 sequences are decoded in-place and `\0` characters are
@@ -43,7 +43,7 @@ The next figure shows JSON string before and after
 parser invocation. Cells bearing a question mark have
 undefined value.
 
-![memory layout](/doc/memlayout.svg)
+![memory layout](./doc/memlayout.svg)
 
 Caller provides the parser with an array of `jstr_token_t`
 objects. This array ends up storing `OBJECT`, `STRING`, `STRING`,
