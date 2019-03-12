@@ -54,11 +54,11 @@ static void test(int lineno, const char *json, ssize_t rc_expected, ... ) {
             }
             if (type_expected&(JSTR_ARRAY|JSTR_OBJECT)) {
                 size_t offset_expected = va_arg(ap, size_t);
-                if (type_match && jstr__offset(token+i) != offset_expected) {
+                if (type_match && (token+i)->value__ != offset_expected) {
                     fprintf(
                         stderr, "@%04d: [%03zu] %6s (expected) %zu != %zu\n",
                         lineno, i, jstr_type_to_str(type_expected),
-                        offset_expected, jstr__offset(token + i)
+                        offset_expected, (token + i)->value__
                     );
                 }
             } else {
